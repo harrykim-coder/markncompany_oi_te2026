@@ -297,7 +297,7 @@
         <p class="subtitle">기업의 혁신 과제를 스타트업 협업으로 연결하고,<br>실질적인 PoC와 사업화까지 함께합니다.</p>
         <div class="hero-actions">
           <a class="btn btn-primary" href="#contact">우리 회사 OI 상담하기</a>
-          <a class="btn btn-secondary" href="#how">우리가 하는 일 보기</a>
+          <a class="btn btn-secondary" href="#how">마크앤컴퍼니 OI 살펴보기</a>
         </div>
         <p class="small-note">대기업·중견기업 OI / 신사업 / 전략 / DX / 스타트업 협업 담당자 대상</p>
       </div>
@@ -511,10 +511,38 @@
               <label for="message">간단한 협업 니즈</label>
               <textarea id="message" name="message" placeholder="예: 생성형 AI 기반 업무 자동화 관련 스타트업을 찾고 있습니다."></textarea>
             </div>
+            
+<!-- 동의 영역 -->
+<div class="field" style="gap:10px; margin-top:4px;">
 
+  <label class="check" style="align-items:flex-start;">
+    <input
+      type="checkbox"
+      name="privacyConsent"
+      value="동의"
+      required
+    />
+    <span>
+      <strong>[필수]</strong>
+      상담 진행을 위한 개인정보 수집·이용에 동의합니다.
+    </span>
+  </label>
+
+  <label class="check" style="align-items:flex-start;">
+    <input
+      type="checkbox"
+      name="newsletterConsent"
+      value="동의"
+    />
+    <span>
+      <strong>[선택]</strong>
+      마크앤컴퍼니의 오픈이노베이션 프로그램 및 관련 소식을 이메일로 받아보겠습니다.
+    </span>
+  </label>
+            
             <div style="display:flex; gap:10px; flex-wrap:wrap;">
               <button class="btn btn-primary" type="submit">상담 신청하기</button>
-              <button class="btn btn-secondary" type="button" id="copyMail">담당자 메일용 내용 복사</button>
+              <button class="btn btn-secondary" type="button" id="copyMail">이메일 문의용 초안 복사</button>
             </div>
             <div class="success-box" id="successBox">
               상담 신청이 완료되었습니다. 행사 이후 담당자가 연락드리겠습니다.
@@ -557,6 +585,8 @@
         phone: formData.get('phone') || '',
         interests: formData.getAll('interest').join(', '),
         message: formData.get('message') || ''
+        privacyConsent: formData.get('privacyConsent') || '미동의',
+        newsletterConsent: formData.get('newsletterConsent') || '미동의'
       };
       const submitBtn = form.querySelector('button[type="submit"]');
       submitting = true;
@@ -579,7 +609,7 @@
         successBox.textContent = '상담 신청이 완료되었습니다. 행사 이후 담당자가 연락드리겠습니다.';
         form.reset();
       } catch (error) {
-        successBox.textContent = '저장 완료를 확인하지 못했습니다. 입력 내용은 유지됩니다. 중복 접수를 피하려면 담당자에게 접수 여부를 확인해 주세요. 아래 내용을 전달하려면 “담당자 메일용 내용 복사”를 이용해 주세요.';
+        successBox.textContent = '저장 완료를 확인하지 못했습니다. 입력 내용은 유지됩니다. 중복 접수를 피하려면 담당자에게 접수 여부를 확인해 주세요. 아래 내용을 전달하려면 “이메일 문의용 초안 복사”를 이용해 주세요.';
       } finally {
         clearTimeout(timeout);
         submitting = false;
@@ -609,7 +639,7 @@
 
       try {
         await navigator.clipboard.writeText(text);
-        alert('메일용 내용이 복사되었습니다.');
+        alert('이메일 문의용 초안이 복사되었습니다.');
       } catch (err) {
         alert('복사 기능을 사용할 수 없습니다. 다른 브라우저에서 시도해 주세요.');
       }
