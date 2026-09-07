@@ -563,73 +563,101 @@
     <a class="btn btn-primary" href="#contact">상담 신청하기</a>
   </div>
 
-  <script>
-    const form = document.getElementById('consultForm');
-    const successBox = document.getElementById('successBox');
-    const copyMailBtn = document.getElementById('copyMail');
+<script>
+  const form = document.getElementById('consultForm');
+  const successBox = document.getElementById('successBox');
+  const copyMailBtn = document.getElementById('copyMail');
 
-    const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxhif4fbTXaANpZUNYs1ITIrStJofFs0mx-B5Q62ISN1FdTpSFk65mgRsvTkOFGkiQK/exec';
-    let submitting = false;
-    successBox.setAttribute('role', 'status');
-    successBox.setAttribute('aria-live', 'polite');
+  const GOOGLE_SCRIPT_URL =
+    'https://script.google.com/macros/s/AKfycbxhif4fbTXaANpZUNYs1ITIrStJofFs0mx-B5Q62ISN1FdTpSFk65mgRsvTkOFGkiQK/exec';
 
-    form.addEventListener('submit', async function(e) {
-      e.preventDefault();
-      if (submitting) return;
-      const formData = new FormData(form);
-      const payload = {
-        submittedAt: new Date().toISOString(),
-        company: formData.get('company') || '',
-        name: formData.get('name') || '',
-        email: formData.get('email') || '',
-        phone: formData.get('phone') || '',
-        interests: formData.getAll('interest').join(', '),
-        message: formData.get('message') || ''
-        privacyConsent: formData.get('privacyConsent') || '미동의',
-        newsletterConsent: formData.get('newsletterConsent') || '미동의'
-      };
-      const submitBtn = form.querySelector('button[type="submit"]');
-      submitting = true;
-      submitBtn.disabled = true;
-      submitBtn.textContent = '전송 중…';
-      successBox.style.display = 'none';
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 30000);
-      try {
-        const response = await fetch(GOOGLE_SCRIPT_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify(payload),
-          redirect: 'follow',
-          signal: controller.signal
-        });
-        if (!response.ok) throw new Error('HTTP ' + response.status);
-        const result = await response.json();
-        if (result.ok !== true) throw new Error(result.error || '저장 실패');
-        successBox.textContent = '상담 신청이 완료되었습니다. 행사 이후 담당자가 연락드리겠습니다.';
-        form.reset();
-      } catch (error) {
-        successBox.textContent = '저장 완료를 확인하지 못했습니다. 입력 내용은 유지됩니다. 중복 접수를 피하려면 담당자에게 접수 여부를 확인해 주세요. 아래 내용을 전달하려면 “이메일 문의용 초안 복사”를 이용해 주세요.';
-      } finally {
-        clearTimeout(timeout);
-        submitting = false;
-        submitBtn.disabled = false;
-        submitBtn.textContent = '상담 신청하기';
-        successBox.style.display = 'block';
-        successBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      }
-    });
-    copyMailBtn.addEventListener('click', async function() {
-      const company = document.getElementById('company').value || '';
-      const name = document.getElementById('name').value || '';
-      const email = document.getElementById('email').value || '';
-      const phone = document.getElementById('phone').value || '';
-      const message = document.getElementById('message').value || '';
-      const interests = Array.from(document.querySelectorAll('input[name="interest"]:checked'))
-        .map(el => el.value).join(', ');
+  let submitting = false;
 
-      const text = 
-`[TE 2026 OI 상담 신청]
+  successBox.setAttribute('role', 'status');
+  successBox.setAttribute('aria-live', 'polite');
+
+  form.addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    if (submitting) return;
+
+    const formData = new FormData(form);
+
+    const payload = {
+      submittedAt: new Date().toISOString(),
+      company: formData.get('company') || '',
+      name: formData.get('name') || '',
+      email: formData.get('email') || '',
+      phone: formData.get('phone') || '',
+      interests: formData.getAll('interest').join(', '),
+      message: formData.get('message') || '',
+      privacyConsent: formData.get('privacyConsent') || '미동의',
+      newsletterConsent: formData.get('newsletterConsent') || '미동의'
+    };
+
+    const submitBtn = form.querySelector('button[type="submit"]');
+
+    submitting = true;
+    submitBtn.disabled = true;
+    submitBtn.textContent = '전송 중…';
+    successBox.style.display = 'none';
+
+    try {
+      await fetch(GOOGLE_SCRIPT_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/plain;charset=utf-8'
+        },
+        body: JSON.stringify(payload),
+        mode: 'no-cors'
+      });
+
+      successBox.textContent =
+        '상담 신청이 완료되었습니다. 행사 이후 담당자가 연락드리겠습니다.';
+
+      successBox.style.background = '#EFFAF5';
+      successBox.style.color = '#0F8A5F';
+      successBox.style.borderColor = '#CDECD9';
+
+      form.reset();
+
+    } catch (error) {
+      console.error(error);
+
+      successBox.textContent =
+        '상담 신청 전송 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.';
+
+      successBox.style.background = '#FFF4F4';
+      successBox.style.color = '#B42318';
+      successBox.style.borderColor = '#F5C2C0';
+
+    } finally {
+      submitting = false;
+      submitBtn.disabled = false;
+      submitBtn.textContent = '상담 신청하기';
+      successBox.style.display = 'block';
+
+      successBox.scrollIntoView({
+        behavior: 'smooth',
+        block: 'nearest'
+      });
+    }
+  });
+
+  copyMailBtn.addEventListener('click', async function() {
+    const company = document.getElementById('company').value || '';
+    const name = document.getElementById('name').value || '';
+    const email = document.getElementById('email').value || '';
+    const phone = document.getElementById('phone').value || '';
+    const message = document.getElementById('message').value || '';
+
+    const interests = Array.from(
+      document.querySelectorAll('input[name="interest"]:checked')
+    )
+      .map(el => el.value)
+      .join(', ');
+
+    const text = `[TE 2026 OI 상담 신청]
 회사명: ${company}
 이름/직책: ${name}
 이메일: ${email}
@@ -637,13 +665,13 @@
 관심 분야: ${interests}
 협업 니즈: ${message}`;
 
-      try {
-        await navigator.clipboard.writeText(text);
-        alert('이메일 문의용 초안이 복사되었습니다.');
-      } catch (err) {
-        alert('복사 기능을 사용할 수 없습니다. 다른 브라우저에서 시도해 주세요.');
-      }
-    });
-  </script>
+    try {
+      await navigator.clipboard.writeText(text);
+      alert('이메일 문의용 초안이 복사되었습니다.');
+    } catch (err) {
+      alert('복사 기능을 사용할 수 없습니다. 다른 브라우저에서 시도해 주세요.');
+    }
+  });
+</script>
 </body>
 </html>
